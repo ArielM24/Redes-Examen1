@@ -23,7 +23,14 @@ func MakeDic(words []string) map[string][]int{
 		dir := Rd.Intn(8)
 		end := 0
 		fmt.Println(w,dir)
-		m[w] = getPos(dir,start,end,w)
+		pos := getPos(dir,start,end,w)
+		/*for !verifyPosition(pos,m) {
+			start := Rd.Intn(225)
+			dir := Rd.Intn(8)
+			end := 0
+			pos = getPos(dir,start,end,w)
+		}*/
+		m[w] = pos
 	}
 
 	return m
@@ -56,7 +63,7 @@ func getPos(dir, start,end int, w string) []int {
 			pos = diagI(start, end, len(w))
 		break
 		case 6:
-			end = start - (len(w))*16
+			end = start - (len(w)-1)*16
 			pos = diagR(start, end, len(w))
 		break
 		case 7:
@@ -68,9 +75,9 @@ func getPos(dir, start,end int, w string) []int {
 }
 
 func verifyPosition(data []int, words map[string][]int) bool{
-	for _,v := range words {
-		for _,n := range v {
-			n++
+	for _,pos := range words {
+		if Contains(data,pos) {
+			return false
 		}
 	}
 	return true
@@ -88,32 +95,61 @@ func Contains(a,b []int) bool {
 }
 
 func getNumbers(pos []int, w string) []int {
-	numbers := make([]int, len(w))
+	sz := len(w)
+	numbers := make([]int, sz)
 
 	switch pos[3] {
 		case 0:
-			
+			for i := pos[0]; i < pos[1]; i++{
+				numbers = append(numbers,i)
+			}
 		break
 		case 1:
-			
+			for i := pos[1]; i < pos[0]; i++{
+				numbers = append(numbers,i)
+			}
 		break
 		case 2:
-			
+			j := pos[0]
+			for i := 0; i < sz; i++{
+				numbers = append(numbers,j)
+				j += 15
+			}
 		break
 		case 3:
-			
+			j := pos[0]
+			for i := 0; i < sz; i++{
+				numbers = append(numbers,j)
+				j -= 15
+			}
 		break
 		case 4:
-			
+			j := pos[0]
+			for i := 0; i < sz; i++{
+				numbers = append(numbers,j)
+				j -= 14
+			}
 		break
 		case 5:
-			
+			j := pos[0]
+			for i := 0; i < sz; i++{
+				numbers = append(numbers,j)
+				j += 15
+			}
 		break
 		case 6:
-			
+			j := pos[0]
+			for i := 0; i < sz; i++{
+				numbers = append(numbers,j)
+				j -= 16
+			}
 		break
 		case 7:
-			
+			j := pos[0]
+			for i := 0; i < sz; i++{
+				numbers = append(numbers,j)
+				j += 16
+			}
 		break
 	}
 	return numbers
@@ -158,7 +194,7 @@ func diag(start, end, sz int) []int {
 		end += 15
 		start += 15
 	}
-	lim := int((start + (sz-1)*15)/15)*15 + 14
+	lim := int((start + (sz-1))/15)*15 + 14
 	for end > lim {
 		end--
 		start--
@@ -171,10 +207,10 @@ func diagI(start, end, sz int) []int {
 		end -= 15
 		start -= 15
 	}
-	lim := int((start + (sz-1)*15)/15)*15
-	for end > lim {
-		end--
-		start--
+	lim := int(start/15)*15
+	for end < lim {
+		end++
+		start++
 	}
 	return []int{start,end,5}
 
@@ -182,28 +218,32 @@ func diagI(start, end, sz int) []int {
 
 
 func diagR(start, end, sz int) []int {
+	fmt.Println("6",start, end, sz)
 	for end < 0 {
 		end += 15
 		start += 15
 	}
-	lim := int((start - (sz-1)*15)/15)*15
-	for end > lim {
+	lim := int(start/15)*15
+	for end < lim {
 		end++
 		start++
 	}
+	fmt.Println("66",start, end, sz)
 	return []int{start,end,6}
 }
 
 func diagRI(start, end,sz int) []int {
+	fmt.Println("7",start, end, sz)
 	for end > 224 {
 		end -= 15
 		start -= 15
 	}
-	lim := int((start + (sz-1)*15)/15)*15 + 14
+	lim := int((start + (sz-1))/15)*15 + 14
 	for end > lim {
 		end--
 		start--
 	}
+	fmt.Println("77",start, end, sz)
 	return []int{start,end,7}
 }
 
