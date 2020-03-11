@@ -4,6 +4,7 @@ import(
 	"fmt"
 	"math/rand"
     "time"
+    "strconv"
 )
 
 
@@ -61,11 +62,11 @@ func getPos(dir, start,end int, w string) []int {
 			pos = inv(start, end)
 		break
 		case 2:
-			end = start + (len(w))*size
+			end = start + (len(w)-1)*size
 			pos = abj(start, end)
 		break
 		case 3:
-			end = start - (len(w))*size
+			end = start - (len(w)-1)*size
 			pos = arr(start, end)
 		break
 		case 4:
@@ -394,8 +395,10 @@ func fillWord(board []int, word string, lim []int) []int{
 }
 
 func IsThere(start, end string, soup map[string][]int) bool {
-	x1 := (int(start[0]) - 97) + (int(start[1]) - 48) * size
-	x2 := (int(end[0]) - 97) + (int(end[1]) - 48) * size
+	aux1,_ := strconv.Atoi(start[1:])
+	aux2,_ := strconv.Atoi(end[1:])
+	x1 := (int(start[0]) - 97) + aux1 * size
+	x2 := (int(end[0]) - 97) + aux2 * size
 	fmt.Println(x1,x2)
 	for w,pos := range soup {
 		if (pos[0] == x1 && pos[1] == x2) || (pos[0] == x2 && pos[1] == x1) {
