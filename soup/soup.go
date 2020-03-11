@@ -18,18 +18,24 @@ import(
 func MakeDic(words []string) map[string][]int{
 	Rd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	m := make(map[string][]int)
+	force := 0;
 	for _,w := range words {
 		start := Rd.Intn(225)
 		dir := Rd.Intn(8)
 		end := 0
 		fmt.Println(w,dir)
 		pos := getPos(dir,start,end,w)
-		/*for !verifyPosition(pos,m) {
-			start := Rd.Intn(225)
-			dir := Rd.Intn(8)
-			end := 0
+		for !verifyPosition(pos,m) {
+			start = Rd.Intn(225)
+			dir = Rd.Intn(8)
+			end = 0
+			fmt.Println("dir:",dir)
 			pos = getPos(dir,start,end,w)
-		}*/
+			force++
+			if force > 30 {
+				return m
+			}
+		}
 		m[w] = pos
 	}
 
@@ -88,6 +94,26 @@ func Contains(a,b []int) bool {
 		for _,v2 := range b {
 			if v1 == v2 {
 				return true
+			}
+		}
+	}
+	return false
+}
+
+func Match(a,b []int, w1,w2 string) bool {
+	match := false
+	for _,v1 := range a {
+		for _,v2 := range b {
+			if v1 == v2 {
+				if !match {
+					if w1[v1] == w2[v2] {
+						match = true
+					}else{
+						return false
+					}
+				}else{ 
+					return false 
+				}
 			}
 		}
 	}
@@ -194,8 +220,11 @@ func diag(start, end, sz int) []int {
 		end += 15
 		start += 15
 	}
-	lim := int((start + (sz-1))/15)*15 + 14
-	for end > lim {
+	aux := start + sz - 1
+	lim := int((aux)/15)*15 + 14
+
+	for aux > lim {
+		aux--
 		end--
 		start--
 	}
@@ -207,8 +236,10 @@ func diagI(start, end, sz int) []int {
 		end -= 15
 		start -= 15
 	}
-	lim := int(start/15)*15
-	for end < lim {
+	aux := start - sz + 1
+	lim := int(aux/15)*15
+	for aux < lim {
+		aux++
 		end++
 		start++
 	}
@@ -218,32 +249,34 @@ func diagI(start, end, sz int) []int {
 
 
 func diagR(start, end, sz int) []int {
-	fmt.Println("6",start, end, sz)
 	for end < 0 {
 		end += 15
 		start += 15
 	}
+	aux := start - sz + 1
 	lim := int(start/15)*15
-	for end < lim {
+	for aux < lim {
+		aux++
 		end++
 		start++
 	}
-	fmt.Println("66",start, end, sz)
+	fmt.Println("6",start, end, sz)
 	return []int{start,end,6}
 }
 
 func diagRI(start, end,sz int) []int {
-	fmt.Println("7",start, end, sz)
 	for end > 224 {
 		end -= 15
 		start -= 15
 	}
-	lim := int((start + (sz-1))/15)*15 + 14
-	for end > lim {
+	aux := start + sz - 1
+	lim := int((aux)/15)*15 + 14
+	for aux > lim {
+		aux--
 		end--
 		start--
 	}
-	fmt.Println("77",start, end, sz)
+	fmt.Println("7",start, end, sz)
 	return []int{start,end,7}
 }
 
