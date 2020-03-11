@@ -15,28 +15,33 @@ import(
 //5 -> diag inv
 //6 -> diag rev
 //7 -> diag inv rev
+const size = 15
+
 func MakeDic(words []string) map[string][]int{
 	Rd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	m := make(map[string][]int)
-	force := 0;
+	//force := 0;
 	for _,w := range words {
-		start := Rd.Intn(225)
+		start := Rd.Intn(size*size)
 		dir := Rd.Intn(8)
 		end := 0
 		fmt.Println(w,dir)
 		pos := getPos(dir,start,end,w)
 		for !verifyPosition(pos,m) {
-			start = Rd.Intn(225)
+			fmt.Println(w,"pos1:",pos,getNumbers(pos,w))
+			start = Rd.Intn(size*size)
 			dir = Rd.Intn(8)
 			end = 0
-			fmt.Println("dir:",dir)
 			pos = getPos(dir,start,end,w)
-			force++
+			fmt.Println(w,"pos2:",pos,getNumbers(pos,w))
+			fmt.Scanf("%d",&dir)
+			/*force++
 			if force > 30 {
-				return m
-			}
+				return MakeDic(words)
+			}*/
 		}
 		m[w] = pos
+		fmt.Println(w,m[w],getNumbers(m[w],w))
 	}
 
 	return m
@@ -53,27 +58,27 @@ func getPos(dir, start,end int, w string) []int {
 			pos = inv(start, end)
 		break
 		case 2:
-			end = start + (len(w))*15
+			end = start + (len(w))*size
 			pos = abj(start, end)
 		break
 		case 3:
-			end = start - (len(w))*15
+			end = start - (len(w))*size
 			pos = arr(start, end)
 		break
 		case 4:
-			end = start - (len(w)-1)*14
+			end = start - (len(w)-1)*(size - 1)
 			pos = diag(start, end, len(w))
 		break
 		case 5:
-			end = start + (len(w)-1)*14
+			end = start + (len(w)-1)*(size - 1)
 			pos = diagI(start, end, len(w))
 		break
 		case 6:
-			end = start - (len(w)-1)*16
+			end = start - (len(w)-1)*(size + 1)
 			pos = diagR(start, end, len(w))
 		break
 		case 7:
-			end = start + (len(w)-1)*16
+			end = start + (len(w)-1)*(size + 1)
 			pos = diagRI(start, end,len(w))
 		break
 	}
@@ -81,8 +86,8 @@ func getPos(dir, start,end int, w string) []int {
 }
 
 func verifyPosition(data []int, words map[string][]int) bool{
-	for _,pos := range words {
-		if Contains(data,pos) {
+	for w,pos := range words {
+		if Contains(data,getNumbers(pos,w)) {
 			return false
 		}
 	}
@@ -122,16 +127,16 @@ func Match(a,b []int, w1,w2 string) bool {
 
 func getNumbers(pos []int, w string) []int {
 	sz := len(w)
-	numbers := make([]int, sz)
+	numbers := make([]int,0)
 
-	switch pos[3] {
+	switch pos[2] {
 		case 0:
-			for i := pos[0]; i < pos[1]; i++{
+			for i := pos[0]; i <= pos[1]; i++{
 				numbers = append(numbers,i)
 			}
 		break
 		case 1:
-			for i := pos[1]; i < pos[0]; i++{
+			for i := pos[1]; i <= pos[0]; i++{
 				numbers = append(numbers,i)
 			}
 		break
@@ -139,42 +144,42 @@ func getNumbers(pos []int, w string) []int {
 			j := pos[0]
 			for i := 0; i < sz; i++{
 				numbers = append(numbers,j)
-				j += 15
+				j += size
 			}
 		break
 		case 3:
 			j := pos[0]
 			for i := 0; i < sz; i++{
 				numbers = append(numbers,j)
-				j -= 15
+				j -= size
 			}
 		break
 		case 4:
 			j := pos[0]
 			for i := 0; i < sz; i++{
 				numbers = append(numbers,j)
-				j -= 14
+				j -= (size - 1)
 			}
 		break
 		case 5:
 			j := pos[0]
 			for i := 0; i < sz; i++{
 				numbers = append(numbers,j)
-				j += 15
+				j += (size - 1)
 			}
 		break
 		case 6:
 			j := pos[0]
 			for i := 0; i < sz; i++{
 				numbers = append(numbers,j)
-				j -= 16
+				j -= (size + 1)
 			}
 		break
 		case 7:
 			j := pos[0]
 			for i := 0; i < sz; i++{
 				numbers = append(numbers,j)
-				j += 16
+				j += (size + 1)
 			}
 		break
 	}
@@ -182,7 +187,7 @@ func getNumbers(pos []int, w string) []int {
 }
 
 func normal(start, end int) []int {
-	lim := int(start/15)*15 + 14
+	lim := int(start/size)*size + (size - 1)
 	for end > lim {
 		end--
 		start--
@@ -191,7 +196,7 @@ func normal(start, end int) []int {
 }
 
 func inv(start, end int) []int {
-	lim := int(start/15)*15
+	lim := int(start/size)*size
 	for end < lim {
 		end++
 		start++
@@ -200,28 +205,28 @@ func inv(start, end int) []int {
 }
 
 func abj(start, end int) []int {
-	for end > 224 {
-		end -= 15
-		start -= 15
+	for end > (size*size - 1) {
+		end -= size
+		start -= size
 	}
 	return []int{start,end,2}
 }
 
 func arr(start, end int) []int {
 	for end < 0 {
-		end += 15
-		start += 15
+		end += size
+		start += size
 	}
 	return []int{start,end,3}
 }
 
 func diag(start, end, sz int) []int {
 	for end < 0 {
-		end += 15
-		start += 15
+		end += size
+		start += size
 	}
 	aux := start + sz - 1
-	lim := int((aux)/15)*15 + 14
+	lim := int((aux)/size)*size + (size - 1)
 
 	for aux > lim {
 		aux--
@@ -232,12 +237,12 @@ func diag(start, end, sz int) []int {
 }
 
 func diagI(start, end, sz int) []int {
-	for end > 224 {
-		end -= 15
-		start -= 15
+	for end > (size*size - 1) {
+		end -= size
+		start -= size
 	}
 	aux := start - sz + 1
-	lim := int(aux/15)*15
+	lim := int(aux/size)*size
 	for aux < lim {
 		aux++
 		end++
@@ -250,11 +255,11 @@ func diagI(start, end, sz int) []int {
 
 func diagR(start, end, sz int) []int {
 	for end < 0 {
-		end += 15
-		start += 15
+		end += size
+		start += size
 	}
 	aux := start - sz + 1
-	lim := int(start/15)*15
+	lim := int(start/size)*size
 	for aux < lim {
 		aux++
 		end++
@@ -265,12 +270,12 @@ func diagR(start, end, sz int) []int {
 }
 
 func diagRI(start, end,sz int) []int {
-	for end > 224 {
-		end -= 15
-		start -= 15
+	for end > (size*size - 1) {
+		end -= size
+		start -= size
 	}
 	aux := start + sz - 1
-	lim := int((aux)/15)*15 + 14
+	lim := int((aux)/size)*size + (size - 1)
 	for aux > lim {
 		aux--
 		end--
@@ -281,10 +286,10 @@ func diagRI(start, end,sz int) []int {
 }
 
 func FillBoard(words map[string][]int) []int {
-	board := make([]int,225)
-	for i := 0; i < 15; i++ {
-		for j := 0; j < 15; j++ {
-			board[i*15 + j] = '0'
+	board := make([]int,size*size)
+	for i := 0; i < size; i++ {
+		for j := 0; j < size; j++ {
+			board[i*size + j] = '0'
 		}
 	}
 	for k,v := range words {
@@ -295,9 +300,9 @@ func FillBoard(words map[string][]int) []int {
 }
 
 func PrintBoard(board []int) {
-	for i := 0; i < 15; i++ {
-		for j := 0; j < 15; j++ {
-			fmt.Printf("%c  ",board[i*15 + j])
+	for i := 0; i < size; i++ {
+		for j := 0; j < size; j++ {
+			fmt.Printf("%c  ",board[i*size + j])
 		}
 		fmt.Println()
 	}
@@ -323,42 +328,42 @@ func fillWord(board []int, word string, lim []int) []int{
 		j := lim[0]
 		for i:= 0; i < len(word); i ++{
 			board[j] = int(word[i])
-			j += 15
+			j += size
 		}
 	break
 	case 3:
 		j := lim[0]
 		for i:= 0; i < len(word); i ++{
 			board[j] = int(word[i])
-			j -= 15
+			j -= size
 		}
 	break
 	case 4:
 		j := lim[0]
 		for i:= 0; i < len(word); i ++{
 			board[j] = int(word[i])
-			j -= 14
+			j -= (size - 1)
 		}
 	break
 	case 5:
 		j := lim[0]
 		for i:= 0; i < len(word); i ++{
 			board[j] = int(word[i])
-			j += 14
+			j += (size - 1)
 		}
 	break
 	case 6:
 		j := lim[0]
 		for i:= 0; i < len(word); i ++{
 			board[j] = int(word[i])
-			j -= 16
+			j -= (size + 1)
 		}
 	break
 	case 7:
 		j := lim[0]
 		for i:= 0; i < len(word); i ++{
 			board[j] = int(word[i])
-			j += 16
+			j += (size + 1)
 		}
 	break
 	}
