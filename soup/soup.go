@@ -312,13 +312,18 @@ func FillBoard(words map[string][]int) []int {
 }
 
 func PrintBoard(board []int) {
-	fmt.Printf("    ")
+	fmt.Printf("      ")
 	for i := 0; i < size; i++{
 		fmt.Printf("%c  ",97 + i)
 	}
 	fmt.Println()
+	fmt.Print("-----")
+	for i := 0; i < size; i++{
+		fmt.Print("---")
+	}
+	fmt.Println()
 	for i := 0; i < size; i++ {
-		fmt.Printf("%2d  ",i)
+		fmt.Printf("%3d|  ",i)
 		for j := 0; j < size; j++ {
 			fmt.Printf("%c  ",board[i*size + j])
 		}
@@ -386,4 +391,17 @@ func fillWord(board []int, word string, lim []int) []int{
 	break
 	}
 	return board
+}
+
+func IsThere(start, end string, soup map[string][]int) bool {
+	x1 := (int(start[0]) - 97) + (int(start[1]) - 48) * size
+	x2 := (int(end[0]) - 97) + (int(end[1]) - 48) * size
+	fmt.Println(x1,x2)
+	for w,pos := range soup {
+		if (pos[0] == x1 && pos[1] == x2) || (pos[0] == x2 && pos[1] == x1) {
+			fmt.Println(w)
+			return true
+		}
+	}
+	return false
 }
