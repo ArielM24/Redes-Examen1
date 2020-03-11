@@ -20,33 +20,36 @@ const size = 15
 func MakeDic(words []string) map[string][]int{
 	Rd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	m := make(map[string][]int)
-	//force := 0;
+	force := 0
 	for _,w := range words {
 		start := Rd.Intn(size*size)
 		dir := Rd.Intn(8)
 		end := 0
-		fmt.Println(w,dir)
+		//fmt.Println(w,dir)
 		pos := getPos(dir,start,end,w)
-		for !verifyPosition(pos,m) {
-			fmt.Println(w,"pos1:",pos,getNumbers(pos,w))
+		for !verifyPosition(getNumbers(pos,w),m) {
+			//fmt.Println(w,"pos1:",pos,getNumbers(pos,w))
 			start = Rd.Intn(size*size)
 			dir = Rd.Intn(8)
 			end = 0
 			pos = getPos(dir,start,end,w)
-			fmt.Println(w,"pos2:",pos,getNumbers(pos,w))
-			fmt.Scanf("%d",&dir)
-			/*force++
-			if force > 30 {
-				return MakeDic(words)
-			}*/
+			//fmt.Println(w,"pos2:",pos,getNumbers(pos,w))
+			//fmt.Scanf("%d",&dir)
+			force++
 		}
 		m[w] = pos
-		fmt.Println(w,m[w],getNumbers(m[w],w))
+		//fmt.Println(w,m[w],getNumbers(m[w],w))
+		force++
+		if force > 75 {
+			fmt.Println("rec")
+			return MakeDic(words)
+		}
 	}
-
+	fmt.Println("force",force)
 	return m
 }
 func getPos(dir, start,end int, w string) []int {
+	//fmt.Println(dir)
 	var pos []int
 	switch dir {
 		case 0:
@@ -87,7 +90,9 @@ func getPos(dir, start,end int, w string) []int {
 
 func verifyPosition(data []int, words map[string][]int) bool{
 	for w,pos := range words {
-		if Contains(data,getNumbers(pos,w)) {
+		v := Contains(data,getNumbers(pos,w))
+		//fmt.Println("w:",w,"v:",v)
+		if v {
 			return false
 		}
 	}
@@ -95,6 +100,7 @@ func verifyPosition(data []int, words map[string][]int) bool{
 }
 
 func Contains(a,b []int) bool {
+	//fmt.Println("a:",a,"b:",b)
 	for _,v1 := range a {
 		for _,v2 := range b {
 			if v1 == v2 {
@@ -221,12 +227,14 @@ func arr(start, end int) []int {
 }
 
 func diag(start, end, sz int) []int {
-	for end < 0 {
+	aux := start - sz*size
+	for aux < 0 {
+		aux += size
 		end += size
 		start += size
 	}
-	aux := start + sz - 1
-	lim := int((aux)/size)*size + (size - 1)
+	aux = start + sz - 1
+	lim := int(start/size)*size + (size - 1)
 
 	for aux > lim {
 		aux--
@@ -237,12 +245,14 @@ func diag(start, end, sz int) []int {
 }
 
 func diagI(start, end, sz int) []int {
-	for end > (size*size - 1) {
+	aux := start + sz*size
+	for aux > (size*size - 1) {
+		aux -= size
 		end -= size
 		start -= size
 	}
-	aux := start - sz + 1
-	lim := int(aux/size)*size
+	aux = start - sz + 1
+	lim := int(start/size)*size
 	for aux < lim {
 		aux++
 		end++
@@ -254,34 +264,36 @@ func diagI(start, end, sz int) []int {
 
 
 func diagR(start, end, sz int) []int {
-	for end < 0 {
+	aux := start - sz*size
+	for aux < 0 {
+		aux += 15
 		end += size
 		start += size
 	}
-	aux := start - sz + 1
+	aux = start - sz + 1
 	lim := int(start/size)*size
 	for aux < lim {
 		aux++
 		end++
 		start++
 	}
-	fmt.Println("6",start, end, sz)
 	return []int{start,end,6}
 }
 
 func diagRI(start, end,sz int) []int {
-	for end > (size*size - 1) {
+	aux := start + sz*size
+	for aux > (size*size - 1) {
+		aux -= size
 		end -= size
 		start -= size
 	}
-	aux := start + sz - 1
-	lim := int((aux)/size)*size + (size - 1)
+	aux = start + sz - 1
+	lim := int((start)/size)*size + (size - 1)
 	for aux > lim {
 		aux--
 		end--
 		start--
 	}
-	fmt.Println("7",start, end, sz)
 	return []int{start,end,7}
 }
 
@@ -300,7 +312,13 @@ func FillBoard(words map[string][]int) []int {
 }
 
 func PrintBoard(board []int) {
+	fmt.Printf("    ")
+	for i := 0; i < size; i++{
+		fmt.Printf("%c  ",97 + i)
+	}
+	fmt.Println()
 	for i := 0; i < size; i++ {
+		fmt.Printf("%2d  ",i)
 		for j := 0; j < size; j++ {
 			fmt.Printf("%c  ",board[i*size + j])
 		}
