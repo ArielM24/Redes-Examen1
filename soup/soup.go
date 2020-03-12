@@ -343,7 +343,7 @@ func FillBoard(words map[string][]int) []int {
 func PrintBoard(board []int) {
 	fmt.Printf("      ")
 	for i := 0; i < size; i++{
-		fmt.Printf("%c  ",97 + i)
+		fmt.Printf("%c  ",65 + i)
 	}
 	fmt.Println()
 	fmt.Print("-----")
@@ -422,17 +422,17 @@ func fillWord(board []int, word string, lim []int) []int{
 	return board
 }
 
-func IsThere(start, end string, soup map[string][]int) bool {
+func IsThere(start, end string, soup map[string][]int) (bool,string) {
 	aux1,_ := strconv.Atoi(start[1:])
 	aux2,_ := strconv.Atoi(end[1:])
-	x1 := (int(start[0]) - 97) + aux1 * size
-	x2 := (int(end[0]) - 97) + aux2 * size
+	x1 := (int(start[0]) - 65) + aux1 * size
+	x2 := (int(end[0]) - 65) + aux2 * size
 	fmt.Println(x1,x2)
 	for w,pos := range soup {
 		if (pos[0] == x1 && pos[1] == x2) || (pos[0] == x2 && pos[1] == x1) {
 			fmt.Println(w)
-			return true
+			return true, w
 		}
 	}
-	return false
+	return false,""
 }

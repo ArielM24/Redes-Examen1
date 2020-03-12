@@ -5,6 +5,7 @@ import(
 	"net"
 	"os"
 	"./soup"
+	"strings"
 )
 
 func main() {
@@ -52,13 +53,54 @@ func readOptions(conn net.Conn) {
 func makeGame(conn net.Conn, typ, diff byte, name string) {
 	m := soup.MakeRandomMap(typ)
 	board := soup.FillBoard(m)
+	soup.PrintBoard(board)
 	sendWords(conn, m)
+	sendBoard(conn,board)
 	fmt.Println(len(board))
+	play(conn,typ,diff,m,name)
 }
 
 func sendWords(conn net.Conn, words map[string][]int){
 	for w,_ := range words {
 		aux := fmt.Sprintf("%15s",w)
 		conn.Write([]byte(aux))
+	}
+}
+
+func sendBoard(conn net.Conn, board []int) {
+	data := make([]byte,225)
+	for i,v := range board {
+		data[i] = byte(v)
+	}
+	conn.Write(data)
+}
+
+func play(conn net.Conn, typ, diff byte, m map[string][]int, name string) {
+	found := 0
+	var x1,x2 string
+	buffx1 := make([]byte,3)
+	buffx2 := make([]byte,3)
+	for found < 15 {
+		conn.Read(buffx1)
+		conn.Read(buffx2)
+
+		x1 = string(buffx1)
+		x2 = string(buffx2)
+
+		x1 = strings.Replace(x1," ","",-1)
+		x2 = strings.Replace(x2," ","",-1)
+
+		fmt.Println(x1,x2)
+
+		f,w := soup.IsThere(x1,x2,m)
+		if f {
+			conn.Write([]byte{1})
+			found++
+			m[w] = []int{0,0,0}
+			w = fmt.Sprintf("%15s",w)
+			conn.Write([]byte(w))
+		}else{
+			conn.Write([]byte{0})
+		}
 	}
 }

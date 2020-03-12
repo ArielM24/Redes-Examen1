@@ -51,33 +51,81 @@ func writeOptions(conn net.Conn, op, typ, diff byte, name string) {
 	usr_name := fmt.Sprintf("%15s",name)
 	conn.Write([]byte(usr_name))
 	if op > 0 {
-		readWords(conn,diff,typ)
-		readBoard(conn)
+		words := readWords(conn,diff,typ)
+		board := readBoard(conn)
+		printWords(words,diff,typ,0)
+		soup.PrintBoard(board)
+		play(conn,words,board,typ,diff)
 	}
 }
 
 func readWords(conn net.Conn, diff,typ byte) []string{
-	fmt.Println("Words:")
 	words := make([]string,15)
 	for i := 0; i < 15; i++ {
 		aux := make([]byte,15)
 		conn.Read(aux)
 		w := strings.Replace(string(aux)," ","",-1)
-		if diff == 0 {
-			if typ == 0 {
-				fmt.Println(i,":",w)
-			}else if typ == 1{
-				fmt.Println(i,":",soup.Anagram(w))
-			}
-		}
-		if diff == 2 {
-			fmt.Println(i,":",len(w))
-		}
 		words[i] = w
 	}
 	return words
 }
 
-func readBoard(conn net.Conn) {
+func printWords(words []string,typ, diff,err byte) {
+	fmt.Println("Words:")
+	for i := 0; i < 15; i++ {
+		if diff == 0 {
+			if typ == 0 {
+				fmt.Println(i,":",words[i])
+			}else if typ == 1{
+				fmt.Println(i,":",soup.Anagram(words[i]))
+			}
+		}
+		if diff == 2 {
+			fmt.Println(i,":",len(words[i]))
+		}
+	}
+}
 
+func readBoard(conn net.Conn) []int{
+	data := make([]byte,225)
+	conn.Read(data)
+	board := make([]int,225)
+	for i,v := range data {
+		board[i] = int(v)
+	}
+	return board
+}
+
+func play(conn net.Conn,words []string,board []int, diff, typ byte){
+	found := 0
+	var err byte = 0
+	var x1, x2, w string
+	fbuff := make([]byte,1)
+	wbuff := make([]byte,15)
+	for found < 15 {
+		fmt.Print("x1:\t")
+		fmt.Scanf("%s",&x1)
+
+		fmt.Print("x2:\t")
+		fmt.Scanf("%s",&x2)
+		x1 = fmt.Sprintf("%3s",x1)
+		x2 = fmt.Sprintf("%3s",x2)
+
+		conn.Write([]byte(x1))
+		conn.Write([]byte(x2))
+
+		conn.Read(fbuff)
+		if fbuff[0] == 1 {
+			fmt.Print("Encontrada!  ")
+			conn.Read(wbuff)
+			w = strings.Replace(string(wbuff)," ","",-1)
+			fmt.Println(w)
+			found++
+		}else{
+			fmt.Println("No")
+			err++
+		}
+		printWords(words,diff,typ,err)
+		soup.PrintBoard(board)
+	}
 }
