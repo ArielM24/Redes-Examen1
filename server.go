@@ -6,6 +6,9 @@ import(
 	"os"
 	"./soup"
 	"strings"
+	"time"
+	"io/ioutil"
+	"strconv"
 )
 
 func main() {
@@ -37,16 +40,18 @@ func readOptions(conn net.Conn) {
 	name := make([]byte,15)
 
 	conn.Read(op)
-	conn.Read(typ)
-	conn.Read(diff)
-	conn.Read(name)
 
-	fmt.Println("read:",op,typ,diff,string(name))
 	if op[0] == 0 {
 		conn.Close()
 		fmt.Println("Connection finished!")
 	}else if op[0] == 1 {
+		conn.Read(typ)
+		conn.Read(diff)
+		conn.Read(name)
+		fmt.Println("read:",op,typ,diff,string(name))
 		makeGame(conn,typ[0],diff[0],string(name))
+	}else if op[0] == 2 {
+		watchScores(conn)
 	}
 }
 
@@ -80,6 +85,10 @@ func play(conn net.Conn, typ, diff byte, m map[string][]int, name string) {
 	var x1,x2 string
 	buffx1 := make([]byte,3)
 	buffx2 := make([]byte,3)
+
+	start := time.Now()
+	elapsed := time.Since(start)
+
 	for found < 15 {
 		conn.Read(buffx1)
 		conn.Read(buffx2)
@@ -103,4 +112,22 @@ func play(conn net.Conn, typ, diff byte, m map[string][]int, name string) {
 			conn.Write([]byte{0})
 		}
 	}
+
+	addScore(fmt.Sprintf("%s",start),fmt.Sprintf("%s",elapsed),name)
+}
+
+func addScore(s,e, name string) {
+	f,_ := os.OpenFile("Scores.txt",os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	defer f.Close()
+	f.WriteString(strings.Replace(name," ","",-1)+" "+s+" took "+e+"\n")
+}
+
+func watchScores(conn net.Conn) {
+	data,_ := ioutil.ReadFile("Scores.txt")
+	l1 := strconv.Itoa(len(data))
+	l2 := byte(len(l1))
+	fmt.Println(l1,l2,string(data))
+	conn.Write([]byte{l2})
+	conn.Write([]byte(l1))
+	conn.Write(data)
 }

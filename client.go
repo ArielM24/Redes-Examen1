@@ -5,6 +5,7 @@ import(
 	"net"
 	"./soup"
 	"strings"
+	"strconv"
 )
 
 func main() {
@@ -23,7 +24,7 @@ func main() {
 	fmt.Println("2 -> records")
 	fmt.Scanf("%d", &op)
 
-	if op > 0 {
+	if op == 1 {
 		fmt.Println("Selec a modality")
 		fmt.Println("0 -> topic")
 		fmt.Println("1 -> anagram")
@@ -37,10 +38,13 @@ func main() {
 
 		fmt.Println("Enter your name")
 		fmt.Scanf("%s",&name)
-	}else{
+
+		writeOptions(conn, op, typ, diff, name)
+	}else if op == 2{
+		watchScores(conn)
+	}else {
 		fmt.Println("Goodbye!")
 	}
-	writeOptions(conn, op, typ, diff, name)
 	
 }
 
@@ -55,7 +59,12 @@ func writeOptions(conn net.Conn, op, typ, diff byte, name string) {
 		board := readBoard(conn)
 		printWords(words,diff,typ,0)
 		soup.PrintBoard(board)
-		play(conn,words,board,typ,diff)
+		if op == 1 {
+			play(conn,words,board,typ,diff)
+		}
+		if op == 2 {
+			watchScores(conn)
+		}
 	}
 }
 
@@ -70,19 +79,29 @@ func readWords(conn net.Conn, diff,typ byte) []string{
 	return words
 }
 
-func printWords(words []string,typ, diff,err byte) {
-	fmt.Println("Words:")
-	for i := 0; i < 15; i++ {
-		if diff == 0 {
-			if typ == 0 {
-				fmt.Println(i,":",words[i])
-			}else if typ == 1{
-				fmt.Println(i,":",soup.Anagram(words[i]))
+func printWords(words []string,diff,typ,err byte) {
+	fmt.Println("Words:",typ,diff)
+	if diff != 1 {
+		for i := 0; i < 15; i++ {
+			if diff == 0 {
+				if typ == 0 {
+					fmt.Println(i,":",words[i])
+				}else if typ == 1{
+					fmt.Println(i,":",soup.Anagram(words[i]))
+				}
+			}
+			if diff == 2 {
+				fmt.Println(i,":",len(words[i]))
 			}
 		}
-		if diff == 2 {
-			fmt.Println(i,":",len(words[i]))
-		}
+	}else{
+		for i := 0; i < int(err); i++ {
+			if typ == 0 {
+				fmt.Println(i,":",words[i])
+			}else if typ == 1 {
+				fmt.Println(i,":",soup.Anagram(words[i]))
+			}
+		}	
 	}
 }
 
@@ -96,7 +115,7 @@ func readBoard(conn net.Conn) []int{
 	return board
 }
 
-func play(conn net.Conn,words []string,board []int, diff, typ byte){
+func play(conn net.Conn,words []string,board []int, typ,diff byte){
 	found := 0
 	var err byte = 0
 	var x1, x2, w string
@@ -128,4 +147,17 @@ func play(conn net.Conn,words []string,board []int, diff, typ byte){
 		printWords(words,diff,typ,err)
 		soup.PrintBoard(board)
 	}
+}
+
+func watchScores(conn net.Conn) {
+	conn.Write([]byte{2})
+	buffl1 := make([]byte,1)
+	conn.Read(buffl1)
+	buffl2 := make([]byte,buffl1[0])
+	conn.Read(buffl2)
+	aux, _ := strconv.Atoi(string(buffl2))
+	buffData := make([]byte,aux)
+	conn.Read(buffData)
+	fmt.Println("Scores")
+	fmt.Println(string(buffData))
 }
