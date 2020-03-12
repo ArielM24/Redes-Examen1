@@ -18,7 +18,35 @@ import(
 //7 -> diag inv rev
 const size = 15
 
-func MakeDic(words []string) map[string][]int{
+func Anagram(w string) string {
+	return w[len(w)/2:] + w[:len(w)/2]
+}
+
+func MakeRandomMap(typ byte) map[string][]int{
+	var c1 []string = []string{"PERU","INDIA","CHINA","UK","RUSIA","IRAN",
+		"IRAK","USA","CUBA","CHILE","CATAR","JAPON","CHAD","CONGO","FIYI"}
+	var c2 []string = []string{"c++","c#","python","assembler","java","ruby","go",
+		"javascript","basic","fortran","rust","pascal","perl","swift","dart"}
+	var c3 = []string{"sabritas","doritos","chips","cheetos","totis","taquis","oyuki",
+		"churrumais","rancheritos","crujitos","fritos","ruffles","pringles","paketaxo","runners"}
+	categories := [][]string{c1,c2,c3}
+	Rd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	cat := Rd.Intn(3)
+	if typ == 0 {
+		if cat == 0 {
+			fmt.Println("Category: countries")
+		}
+		if cat == 1 {
+			fmt.Println("Category: programming lenguages")
+		}
+		if cat == 2 {
+			fmt.Println("Category: frituras")
+		}
+	}
+	return MakeMap(categories[cat])
+}
+
+func MakeMap(words []string) map[string][]int{
 	Rd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	m := make(map[string][]int)
 	force := 0
@@ -43,7 +71,7 @@ func MakeDic(words []string) map[string][]int{
 		force++
 		if force > 75 {
 			fmt.Println("rec")
-			return MakeDic(words)
+			return MakeMap(words)
 		}
 	}
 	fmt.Println("force",force)
